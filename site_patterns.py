@@ -1,8 +1,15 @@
+"""
+Site-specific patterns and heuristics for identifying product URLs on different e-commerce platforms.
+"""
+
 from typing import Dict, List, Optional
 from bs4 import BeautifulSoup
 import re
 
 class SitePatternDetector:
+    """
+    Detects product URLs based on site-specific patterns and heuristics.
+    """
     
     DEFAULT_PATTERNS = {
         'virgio.com': {
@@ -40,10 +47,22 @@ class SitePatternDetector:
     }
     
     def __init__(self):
+        """
+        Initialize the site pattern detector.
+        """
         self.site_patterns = self.DEFAULT_PATTERNS.copy()
     
     def add_site_pattern(self, domain: str, url_patterns: List[str], 
                          product_selectors: List[Dict], excluded_patterns: List[str] = None):
+        """
+        Add a new site pattern for a specific domain.
+        
+        Args:
+            domain: The domain name (e.g., 'example.com')
+            url_patterns: List of regex patterns that indicate product URLs
+            product_selectors: List of BeautifulSoup selectors for product page elements
+            excluded_patterns: List of regex patterns to exclude
+        """
         self.site_patterns[domain] = {
             'url_patterns': url_patterns,
             'product_selectors': product_selectors,
@@ -51,6 +70,16 @@ class SitePatternDetector:
         }
     
     def is_product_url(self, url: str, domain: str) -> bool:
+        """
+        Check if a URL is likely to be a product URL based on domain-specific patterns.
+        
+        Args:
+            url: The URL to check
+            domain: The domain name
+            
+        Returns:
+            True if the URL matches product patterns, False otherwise
+        """
         matching_domain = None
         for site_domain in self.site_patterns:
             if site_domain in domain:
@@ -86,6 +115,8 @@ class SitePatternDetector:
         return False
     
     def learn_from_results(self, product_urls: List[str], domain: str):
+        if not product_urls:
+            return None
         
         path_segments = []
         for url in product_urls:
