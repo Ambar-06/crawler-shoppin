@@ -8,22 +8,14 @@ This script crawls e-commerce websites to discover product URLs.
 import asyncio
 import json
 import argparse
-import logging
+from .logger import logging
 import os
 import validators
 from typing import List, Dict
 
 from crawler import ProductURLCrawler
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("crawler.log"),
-        logging.StreamHandler()
-    ]
-)
+
 logger = logging.getLogger("ecommerce_crawler")
 
 def validate_domains(domains: List[str]) -> List[str]:
