@@ -11,6 +11,7 @@ class SitePatternDetector:
     Detects product URLs based on site-specific patterns and heuristics.
     """
     
+    # Default patterns for common e-commerce platforms
     DEFAULT_PATTERNS = {
         'virgio.com': {
             'url_patterns': [r'/products/'],
@@ -80,6 +81,7 @@ class SitePatternDetector:
         Returns:
             True if the URL matches product patterns, False otherwise
         """
+        # Find the matching domain pattern
         matching_domain = None
         for site_domain in self.site_patterns:
             if site_domain in domain:
@@ -89,8 +91,10 @@ class SitePatternDetector:
         if not matching_domain:
             return False
         
+        # Check if URL matches any product patterns for the domain
         for pattern in self.site_patterns[matching_domain]['url_patterns']:
             if re.search(pattern, url):
+                # Check if URL matches any excluded patterns
                 for excluded in self.site_patterns[matching_domain]['excluded_patterns']:
                     if re.search(excluded, url):
                         return False
@@ -129,6 +133,7 @@ class SitePatternDetector:
             if segment and not segment.isdigit():
                 segment_counts[segment] = segment_counts.get(segment, 0) + 1
         
+        # Add new patterns if they appear frequently
         for segment, count in segment_counts.items():
             if count >= len(product_urls) * 0.3:
                 pattern = f'/{segment}/'

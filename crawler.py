@@ -34,6 +34,8 @@ EXCLUDED_PATTERNS = [
         r'/auth',
         r'/register',
         r'/password',
+        r'/know-your-size',
+        r'/ambassador-program',
         r'/order',
         r'/payment',
         r'/contact',
