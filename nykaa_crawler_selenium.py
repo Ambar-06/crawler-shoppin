@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Specialized crawler for Nykaa Fashion website
-"""
-
 import time
 import json
 from base_crawler import BaseCrawler
@@ -15,6 +10,7 @@ from fake_useragent import UserAgent
 
 site_name = "nykaa"
 file = "crawler"
+base_url, core_url = Constant().URL_MAPPING.get(site_name)
 
 logging = get_configured_logger(f"{site_name}_{file}.log")
 logger = logging.getLogger(f"{site_name}_{file}")
@@ -61,7 +57,7 @@ class NykaaFashionCrawler(BaseCrawler):
                     elements = driver.find_elements(By.XPATH, selector)
                     for element in elements:
                         href = element.get_attribute("href")
-                        if href and isinstance(href, str) and "nykaafashion.com" in href:
+                        if href and isinstance(href, str) and core_url in href:
                             category_links.append(href)
                 except Exception:
                     logger.info(f"Error finding categories with selector {selector}")
@@ -95,7 +91,7 @@ class NykaaFashionCrawler(BaseCrawler):
                             elements = driver.find_elements(By.XPATH, selector)
                             for element in elements:
                                 href = element.get_attribute("href")
-                                if href and isinstance(href, str) and "nykaafashion.com" in href:
+                                if href and isinstance(href, str) and core_url in href:
                                     if self._is_product_url(href):
                                         product_urls.add(href)
                                         logger.info(f"Found product URL: {href}")
@@ -117,11 +113,10 @@ class NykaaFashionCrawler(BaseCrawler):
         product_urls = set()
         
         try:
-            search_terms = ["dress"]
             
-            for term in search_terms:
+            for term in Constant().COMMON_SEARCH_TERMS:
                 try:
-                    search_url = f"https://nykaafashion.com/search?q={term}"
+                    search_url = f"{base_url}search?q={term}"
                     logger.info(f"Searching for: {term}")
                     driver.get(search_url)
                     time.sleep(5) 
@@ -146,7 +141,7 @@ class NykaaFashionCrawler(BaseCrawler):
                             elements = driver.find_elements(By.XPATH, selector)
                             for element in elements:
                                 href = element.get_attribute("href")
-                                if href and isinstance(href, str) and "nykaafashion.com" in href:
+                                if href and isinstance(href, str) and core_url in href:
                                     if self._is_product_url(href):
                                         product_urls.add(href)
                                         logger.info(f"Found product URL from search: {href}")
@@ -178,7 +173,7 @@ class NykaaFashionCrawler(BaseCrawler):
             driver = self._setup_driver()
             
             logger.info("Loading homepage")
-            driver.get("https://nykaafashion.com/")
+            driver.get(base_url)
             time.sleep(5) 
             
             category_product_urls = self._extract_links_from_categories(driver)
@@ -208,8 +203,12 @@ if __name__ == "__main__":
     crawler = NykaaFashionCrawler()
     product_urls = crawler.crawl()
     
-    with open(f"{site_name}_product_urls.json", "w") as f:
-        json.dump(product_urls, f, indent=2)
+    results = {
+            f"{base_url}": list(product_urls)
+        }
+        
+    with open(f"{site_name}_product_urls.json", 'w') as f:
+        json.dump(results, f, indent=2)
     
     print(f"Found {len(product_urls)} product URLs from Nykaa Fashion")
-    print(f"Results saved to nykaa_product_urls.json")
+    print(f"Results saved to {site_name}_product_urls.json")

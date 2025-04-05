@@ -15,6 +15,25 @@ logger = logging.getLogger("base_crawler")
 
 
 class BaseCrawler:
+
+    def _scroll_page(self, driver: webdriver.Chrome) -> None:
+        """Scroll down the page to load lazy-loaded content."""
+        try:
+            last_height = driver.execute_script("return document.body.scrollHeight")
+            
+            for _ in range(5):  # Scroll 5 times
+                # Scroll down
+                driver.execute_script("window.scrollBy(0, window.innerHeight);")
+                
+                time.sleep(2)
+                
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
+                
+        except Exception as e:
+            logger.warning(f"Error scrolling page: {e}")
      
     def _setup_driver(self) -> webdriver.Chrome:
         """Set up and return a Chrome browser instance."""

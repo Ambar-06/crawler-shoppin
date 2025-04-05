@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Specialized crawler for Virgio website
-"""
-
 import time
 import json
 from base_crawler import BaseCrawler
@@ -17,6 +12,7 @@ from fake_useragent import UserAgent
 
 site_name = "virgio"
 file = "crawler"
+base_url, core_url = Constant().URL_MAPPING.get(site_name)
 
 logging = get_configured_logger(f"{site_name}_{file}.log")
 logger = logging.getLogger(f"{site_name}_{file}")
@@ -61,7 +57,7 @@ class VirgioCrawler(BaseCrawler):
                     elements = driver.find_elements(By.XPATH, selector)
                     for element in elements:
                         href = element.get_attribute("href")
-                        if href and isinstance(href, str) and "virgio.com" in href and "/collections/" in href:
+                        if href and isinstance(href, str) and core_url in href and "/collections/" in href:
                             collection_links.append(href)
                 except Exception:
                     logger.error(f"Error finding collections with selector {selector}: {e}")
@@ -91,7 +87,7 @@ class VirgioCrawler(BaseCrawler):
                             elements = driver.find_elements(By.XPATH, selector)
                             for element in elements:
                                 href = element.get_attribute("href")
-                                if href and isinstance(href, str) and "virgio.com" in href:
+                                if href and isinstance(href, str) and core_url in href:
                                     if self._is_product_url(href):
                                         product_urls.add(href)
                                         logger.info(f"Found product URL: {href}")
@@ -113,11 +109,10 @@ class VirgioCrawler(BaseCrawler):
         product_urls = set()
         
         try:
-            search_terms = ["dress", "shirt", "jeans", "top", "skirt"]
             
-            for term in search_terms:
+            for term in Constant().COMMON_SEARCH_TERMS:
                 try:
-                    search_url = f"https://www.virgio.com/search?q={term}"
+                    search_url = f"{base_url}search?q={term}"
                     logger.info(f"Searching for: {term}")
                     driver.get(search_url)
                     time.sleep(5)  # Wait for page to load
@@ -138,7 +133,7 @@ class VirgioCrawler(BaseCrawler):
                             elements = driver.find_elements(By.XPATH, selector)
                             for element in elements:
                                 href = element.get_attribute("href")
-                                if href and isinstance(href, str) and "virgio.com" in href:
+                                if href and isinstance(href, str) and core_url in href:
                                     if self._is_product_url(href):
                                         product_urls.add(href)
                                         logger.info(f"Found product URL from search: {href}")
@@ -170,7 +165,7 @@ class VirgioCrawler(BaseCrawler):
             driver = self._setup_driver()
             
             logger.info("Loading homepage")
-            driver.get("https://www.virgio.com/")
+            driver.get(base_url)
             time.sleep(5)
             
             self._handle_cookie_consent(driver)
@@ -202,8 +197,12 @@ if __name__ == "__main__":
     crawler = VirgioCrawler()
     product_urls = crawler.crawl()
     
-    with open(f"{site_name}_product_urls.json", "w") as f:
-        json.dump(product_urls, f, indent=2)
+    results = {
+            f"{base_url}": list(product_urls)
+        }
+        
+    with open(f"{site_name}_product_urls.json", 'w') as f:
+        json.dump(results, f, indent=2)
     
     print(f"Found {len(product_urls)} product URLs from Virgio")
-    print(f"Results saved to virgio_product_urls.json")
+    print(f"Results saved to {site_name}_product_urls.json")
