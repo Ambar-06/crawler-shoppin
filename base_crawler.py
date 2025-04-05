@@ -16,7 +16,7 @@ logger = logging.getLogger("base_crawler")
 
 class BaseCrawler:
      
-     def _setup_driver(self) -> webdriver.Chrome:
+    def _setup_driver(self) -> webdriver.Chrome:
         """Set up and return a Chrome browser instance."""
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
@@ -41,7 +41,7 @@ class BaseCrawler:
         
         return driver
 
-     def _handle_cookie_consent(self, driver: webdriver.Chrome) -> None:
+    def _handle_cookie_consent(self, driver: webdriver.Chrome) -> None:
         """Handle cookie consent popups that might appear on the page."""
         try:
             cookie_button_selectors = [
@@ -66,3 +66,33 @@ class BaseCrawler:
                     continue
         except Exception as e:
             logger.error(f"Error handling cookie consent: {e}")
+
+    def _handle_popups(self, driver: webdriver.Chrome) -> None:
+        """Handle popups like newsletter subscriptions, etc."""
+        try:
+            popup_close_selectors = [
+                "//button[contains(@class, 'close') or contains(@class, 'dismiss') or contains(@class, 'cancel')]",
+                "//div[contains(@class, 'close') or contains(@class, 'dismiss') or contains(@class, 'cancel')]",
+                "//span[contains(@class, 'close') or contains(@class, 'dismiss') or contains(@class, 'cancel')]",
+                "//a[contains(@class, 'close') or contains(@class, 'dismiss') or contains(@class, 'cancel')]",
+                "//button[contains(text(), 'Close') or contains(text(), 'Dismiss') or contains(text(), 'Cancel') or contains(text(), 'No thanks')]",
+                "//button[contains(@class, 'newsletter-popup-close')]",
+                "//div[contains(@class, 'newsletter-popup-close')]",
+                "//button[contains(@class, 'popup-close')]",
+                "//div[contains(@class, 'popup-close')]"
+            ]
+            
+            for selector in popup_close_selectors:
+                try:
+                    WebDriverWait(driver, 3).until(
+                        EC.element_to_be_clickable((By.XPATH, selector))
+                    )
+                    button = driver.find_element(By.XPATH, selector)
+                    button.click()
+                    logger.info("Closed a popup")
+                    time.sleep(1)
+                    return
+                except (TimeoutException, NoSuchElementException, WebDriverException):
+                    continue
+        except Exception as e:
+            logger.error(f"Error handling popups: {e}")
