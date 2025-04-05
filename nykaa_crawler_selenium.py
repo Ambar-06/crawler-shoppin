@@ -5,19 +5,12 @@ Specialized crawler for Nykaa Fashion website
 
 import time
 import json
+from base_crawler import BaseCrawler
 from logger import get_configured_logger
-import random
 from typing import List, Set
-from urllib.parse import urlparse
 from constants import Constant
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
-from webdriver_manager.chrome import ChromeDriverManager
 from fake_useragent import UserAgent
 
 site_name = "nykaa"
@@ -26,7 +19,7 @@ file = "crawler"
 logging = get_configured_logger(f"{site_name}_{file}.log")
 logger = logging.getLogger(f"{site_name}_{file}")
 
-class NykaaFashionCrawler:
+class NykaaFashionCrawler(BaseCrawler):
     """
     Specialized crawler for Nykaa Fashion website.
     """
@@ -34,31 +27,6 @@ class NykaaFashionCrawler:
     def __init__(self):
         """Initialize the crawler."""
         self.user_agent = UserAgent()
-    
-    def _setup_driver(self) -> webdriver.Chrome:
-        """Set up and return a Chrome browser instance."""
-        chrome_options = Options()
-        # chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument(f"--user-agent={self.user_agent.random}")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        
-        chrome_prefs = {
-            "profile.default_content_setting_values.notifications": 1,
-            "profile.default_content_setting_values.cookies": 1,
-        }
-        chrome_options.add_experimental_option("prefs", chrome_prefs)
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.set_page_load_timeout(30)
-        
-        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-        
-        return driver
     
     def _is_product_url(self, url: str) -> bool:
         """Check if a URL is likely to be a product URL."""
