@@ -20,3 +20,24 @@ class Constant:
             '/c/',
             '/lp/'
         ]
+    
+    VIGIO_PRODUCT_PATTERNS  = [
+            '/products/',
+            '/product/',
+            '/p/',
+            '/item/'
+        ]
+    
+    VIGIO_EXCLUDE_PATTERNS = [
+            '/collections/',
+            '/pages/',
+            '/smile-in-style',
+            '/know-your-size',
+            '/account',
+            '/cart',
+            '/checkout',
+            '/search',
+            '/wishlist',
+            '/login',
+            '/register'
+        ]
