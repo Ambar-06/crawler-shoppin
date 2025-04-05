@@ -1,86 +1,130 @@
-# Approach to Identifying Product URLs
+# Approach to E-commerce Product URL Crawling
 
-This document outlines the methodology used to identify product URLs on e-commerce websites.
+This document outlines the methodology used to identify and extract product URLs from e-commerce websites.
 
-## Challenges
+## Architecture Overview
+
+The project follows a modular architecture with the following components:
+
+1. **Base Crawler Class**: Provides common functionality for all specialized crawlers
+2. **Specialized Crawlers**: Implement site-specific logic for each e-commerce platform
+3. **Constants Module**: Centralizes configuration and patterns
+4. **Logger Module**: Provides standardized logging across all components
+
+## Challenges in E-commerce Crawling
 
 Identifying product URLs across different e-commerce platforms presents several challenges:
 
-1. **Varying URL patterns**: Different platforms use different URL structures (e.g., `/product/`, `/p/`, `/item/`)
+1. **Varying URL patterns**: Different platforms use different URL structures (e.g., `/product/`, `/p-`, `/item/`)
 2. **Dynamic content loading**: Many sites use JavaScript to load products
 3. **Pagination**: Products may be spread across multiple pages
-4. **Anti-scraping measures**: Websites may implement measures to prevent crawling
+4. **Anti-scraping measures**: Websites implement measures to prevent automated crawling
+5. **Site-specific structures**: Each e-commerce platform has unique page layouts and navigation patterns
 
 ## Our Approach
 
-### 1. URL Pattern Recognition
+### 1. Modular Design
+
+The crawler is designed with modularity in mind:
+
+- **BaseCrawler**: Contains common functionality like browser setup, cookie handling, and popup management
+- **Specialized Crawlers**: Extend the base crawler with site-specific implementations
+- **Centralized Constants**: Store all URL patterns and configurations in a single location
+
+This approach allows for:
+- Code reusability
+- Easier maintenance
+- Simpler addition of new e-commerce platforms
+
+### 2. Dynamic Category Discovery
+
+Instead of relying on hardcoded category URLs, the crawlers:
+
+- Automatically discover category URLs from the homepage
+- Interact with navigation menus to reveal more categories
+- Fall back to predefined URLs only if discovery fails
+
+This makes the crawlers more robust against site changes and less reliant on manual updates.
+
+### 3. URL Pattern Recognition
 
 We identify product URLs through several methods:
 
 - **Path analysis**: Looking for common product URL patterns such as:
   - `/product/`
-  - `/p/`
+  - `/p-`
   - `/item/`
   - `/products/`
   - `/shop/`
-  - Product IDs in URLs (numeric or alphanumeric sequences)
 
-- **URL structure**: Product URLs often have a specific depth and structure
-  - Example: `domain.com/category/subcategory/product-name-p12345`
+- **Exclusion patterns**: Filtering out non-product URLs like:
+  - `/cart/`
+  - `/account/`
+  - `/login/`
+  - `/category/`
 
-### 2. Content Analysis
+### 4. Browser Automation with Selenium
 
-When a page is fetched, we analyze its content to determine if it's a product page:
+We use Selenium WebDriver to:
 
-- **Schema.org markup**: Many e-commerce sites use Product schema
-- **Open Graph tags**: Looking for `og:type` with value `product`
-- **HTML structure**: Product pages typically contain:
-  - Price information
-  - Add to cart buttons
-  - Product descriptions
-  - Product images
+- Handle JavaScript-rendered content
+- Interact with dynamic elements
+- Scroll pages to load lazy-loaded content
+- Handle cookie consent and popups
 
-### 3. Link Filtering
+### 5. Anti-Bot Evasion
 
-To avoid crawling irrelevant pages, we filter links based on:
+To avoid detection by anti-scraping mechanisms, we implement:
 
-- **Blacklisted patterns**: Excluding paths like `/account/`, `/login/`, `/cart/`
-- **URL depth**: Limiting the depth of crawling to avoid going too deep into non-product areas
-- **Domain restriction**: Only following links within the same domain
+- Random delays between requests
+- User-agent rotation
+- Browser fingerprint modification
+- Handling of cookie consent and popups
 
-### 4. Scalability and Performance
+### 6. Robust Error Handling
 
-To handle large websites efficiently:
+The crawlers implement comprehensive error handling:
 
-- **Asynchronous processing**: Using `asyncio` and `aiohttp` for concurrent requests
-- **Rate limiting**: Implementing delays between requests to avoid overloading servers
-- **Distributed crawling**: Ability to distribute crawling across multiple workers
+- Graceful recovery from timeouts and connection errors
+- Retry mechanisms for failed requests
+- Detailed logging for debugging
 
-### 5. Validation
+## Site-Specific Implementations
 
-To ensure we're correctly identifying product URLs:
+### 1. TataCliq Crawler
 
-- **Sampling**: Manually verifying a sample of discovered URLs
-- **Pattern refinement**: Continuously improving pattern recognition based on results
+- **URL Patterns**: Identifies product URLs containing `/p-`, `/-p-`, `/product/`, `/mdp/`, `/pdp/`, `/buy/`, `/shop/`
+- **Category Discovery**: Dynamically discovers category URLs containing `/c-`
+- **Scrolling**: Implements page scrolling to load lazy-loaded products
+- **Search-based Crawling**: Uses search functionality with common terms to discover more products
 
-## Site-Specific Strategies
+### 2. Nykaa Fashion Crawler
 
-For the required domains, we implement specific strategies:
+- **URL Patterns**: Identifies product URLs containing `/buy/`, `/product/`, `/p/`, `/products/`, `/item/`
+- **Navigation**: Navigates through category pages and pagination
+- **Content Analysis**: Examines page content for product indicators
 
-1. **virgio.com**: 
-   - Product URLs follow pattern: `/products/[product-name]`
-   - Contains product schema markup
+### 3. Virgio Crawler
 
-2. **tatacliq.com**:
-   - Product URLs follow pattern: `/[category]/[product-name]/p-[product-id]`
-   - Uses product schema markup
+- **URL Patterns**: Focuses on URLs containing `/products/`
+- **Exclusion Patterns**: Filters out URLs containing `/collections/`, `/pages/`, `/smile-in-style`, `/know-your-size`
+- **Category Navigation**: Navigates through category pages to discover products
 
-3. **nykaafashion.com**:
-   - Product URLs follow pattern: `/[category]/[product-name]/[product-id]`
-   - Contains add-to-cart functionality
+### 4. Westside Crawler
 
-4. **westside.com**:
-   - Product URLs follow pattern: `/products/[product-name]`
-   - Contains product pricing information
+- **URL Patterns**: Identifies product URLs containing `/products/`, `/shop/`
+- **Category and Search Crawling**: Combines category navigation and search functionality
+- **Exclusion Patterns**: Filters out URLs containing `/collection/`, `/collections/`
 
-By combining these approaches, we can effectively identify product URLs across different e-commerce platforms while maintaining scalability and performance.
+## Performance Optimization
+
+To ensure efficient crawling:
+
+- **Headless Browser**: Uses headless mode for better performance
+- **Controlled Scrolling**: Limits scrolling to avoid excessive page loading
+- **Random Delays**: Implements random delays between requests to avoid detection
+- **Resource Cleanup**: Ensures proper cleanup of browser resources
+
+## Conclusion
+
+By combining a modular architecture, dynamic discovery, and site-specific optimizations, our crawler effectively identifies product URLs across different e-commerce platforms while maintaining robustness and adaptability to site changes.

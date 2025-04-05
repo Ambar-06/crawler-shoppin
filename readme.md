@@ -1,6 +1,6 @@
 # E-commerce Product URL Crawler
 
-A scalable web crawler designed to discover and list product URLs across multiple e-commerce websites.
+A modular and scalable web crawler designed to discover and list product URLs across multiple e-commerce websites.
 
 ## Objective
 
@@ -8,32 +8,33 @@ The primary task of this crawler is to discover and list all product URLs across
 
 ## Features
 
+- **Modular Architecture**: Follows a clean, modular design with a base crawler class and specialized implementations
 - **Intelligent URL Discovery**: Identifies product pages by analyzing URL patterns, page content, and site-specific heuristics
-- **Scalability**: Handles large websites with thousands of pages efficiently
-- **Asynchronous Processing**: Executes crawling in parallel using asyncio for optimal performance
-- **Adaptive Learning**: Improves pattern recognition based on discovered product URLs
-- **Robustness**: Handles various URL structures across different e-commerce platforms
-- **Visualization**: Includes tools to analyze and visualize the discovered product URLs
+- **Dynamic Category Discovery**: Automatically discovers category URLs from homepage and navigation menus
+- **Anti-Bot Evasion**: Implements techniques to avoid detection by anti-scraping mechanisms
+- **Robust Error Handling**: Gracefully handles exceptions and timeouts during crawling
+- **Centralized Constants**: Uses a constants file for easy configuration and maintenance
+- **Standardized Logging**: Implements consistent logging across all crawler components
 
 ## Project Structure
 
 ```
-├── main.py               # Main script to run the crawler
-├── crawler.py            # Core crawler implementation
-├── site_patterns.py      # Site-specific pattern detection
-├── utils.py              # Utility functions
-├── test_crawler.py       # Script for testing on individual domains
-├── visualize_results.py  # Script to generate HTML reports of results
-├── requirements.txt      # Project dependencies
-├── APPROACH.md           # Detailed explanation of the methodology
-└── README.md             # Project documentation
+├── base_crawler.py                # Base crawler class with common functionality
+├── constants.py                   # Centralized constants and configuration
+├── logger.py                      # Logging configuration
+├── tatacliq_crawler_selenium.py   # TataCliq specialized crawler
+├── nykaa_crawler_selenium.py      # Nykaa Fashion specialized crawler
+├── virgio_crawler_selenium.py     # Virgio specialized crawler
+├── westside_crawler_selenium.py   # Westside specialized crawler
+├── APPROACH.md                    # Detailed explanation of the methodology
+└── README.md                      # Project documentation
 ```
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Ambar-06/ecommerce-product-url-crawler.git
+git clone https://github.com/Ambar-06/crawler-shoppin.git
 cd ecommerce-product-url-crawler
 ```
 
@@ -48,102 +49,85 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Dependencies
+
+The project relies on the following main dependencies:
+- Selenium for browser automation
+- WebDriverManager for managing browser drivers
+- Fake UserAgent for generating user agents
+
 ## Usage
 
-### Basic Usage
+### Running Individual Crawlers
 
-Run the crawler with default settings:
-
-```bash
-python main.py
-```
-
-This will crawl the default domains:
-- https://www.virgio.com/
-- https://www.tatacliq.com/
-- https://nykaafashion.com/
-- https://www.westside.com/
-
-### Custom Domains
-
-Specify custom domains to crawl:
+Each crawler can be run independently:
 
 ```bash
-python main.py --domains example1.com example2.com example3.com
+python3 tatacliq_crawler_selenium.py  # Run TataCliq crawler
+python3 nykaa_crawler_selenium.py     # Run Nykaa Fashion crawler
+python3 virgio_crawler_selenium.py    # Run Virgio crawler
+python3 westside_crawler_selenium.py  # Run Westside crawler
 ```
 
-### Advanced Options
+### Output
 
-```bash
-python main.py --domains example.com --max-pages 500 --max-depth 3 --concurrency 5 --rate-limit 3 --output results.json
-```
+Each crawler generates a JSON file with the discovered product URLs:
+- `tatacliq_product_urls.json`
+- `nykaa_product_urls.json`
+- `virgio_product_urls.json`
+- `westside_product_urls.json`
 
-Parameters:
-- `--domains`: List of domains to crawl
-- `--max-pages`: Maximum number of pages to crawl per domain (default: 1000)
-- `--max-depth`: Maximum depth to crawl (default: 5)
-- `--concurrency`: Maximum number of concurrent requests (default: 10)
-- `--rate-limit`: Maximum number of requests per second (default: 5)
-- `--output`: Output file path (default: product_urls.json)
-
-### Testing Individual Domains
-
-To test the crawler on a single domain:
-
-```bash
-python test_crawler.py example.com
-```
-
-### Visualizing Results
-
-Generate an HTML report of the crawl results:
-
-```bash
-python visualize_results.py product_urls.json
-```
-
-This will create an HTML report (`crawler_report.html`) that you can open in a web browser to analyze the discovered product URLs.
-
-## Output Format
-
-The crawler generates a JSON file with the following structure:
+The output format is a dictionary mapping domain URLs to lists of product URLs:
 
 ```json
 {
-  "https://www.example1.com/": [
-    "https://www.example1.com/product/12345",
-    "https://www.example1.com/product/67890",
-    ...
-  ],
-  "https://www.example2.com/": [
-    "https://www.example2.com/p/12345",
-    "https://www.example2.com/p/67890",
+  "https://www.example.com/": [
+    "https://www.example.com/product/item1",
+    "https://www.example.com/product/item2",
     ...
   ]
 }
 ```
 
-## Approach
+## Extending the Crawler
 
-Our approach to identifying product URLs combines several techniques:
+To add support for a new e-commerce website:
 
-1. **URL Pattern Recognition**: Analyzing URL structures to identify common product patterns
-2. **Content Analysis**: Examining page content for product indicators
-3. **Site-Specific Heuristics**: Using domain-specific patterns for better accuracy
-4. **Adaptive Learning**: Improving pattern recognition based on discovered URLs
+1. Create a new file for the specialized crawler (e.g., `newsite_crawler_selenium.py`)
+2. Extend the `BaseCrawler` class
+3. Implement site-specific methods for URL detection and crawling
+4. Add site-specific constants to `constants.py`
 
-For a detailed explanation of the methodology, see [APPROACH.md](APPROACH.md).
+Example:
+
+```python
+from base_crawler import BaseCrawler
+from constants import Constant
+from logger import get_configured_logger
+
+class NewSiteCrawler(BaseCrawler):
+    def __init__(self):
+        # Initialize crawler
+        
+    def _is_product_url(self, url):
+        # Implement product URL detection
+        
+    def crawl(self):
+        # Implement crawling logic
+```
 
 ## Performance Considerations
 
-- **Rate Limiting**: The crawler implements rate limiting to avoid overloading servers
-- **Concurrency Control**: The number of concurrent requests can be adjusted based on server capacity
-- **Memory Usage**: The crawler uses sets to efficiently track visited URLs and avoid duplicates
-- **Timeout Handling**: Requests have timeouts to prevent hanging on slow responses
+- The crawlers use a headless browser by default for better performance
+- Adjust the scrolling and delay parameters in the crawler implementations for optimal results
+- Consider running crawlers in parallel for faster processing of multiple sites
 
-## Limitations
+## Troubleshooting
 
-- The crawler respects robots.txt implicitly through rate limiting but does not explicitly parse it
-- JavaScript-rendered content may not be fully accessible (consider using a headless browser for such cases)
-- Some websites may implement anti-scraping measures that could affect the crawler's performance
+- If you encounter "ChromeDriver not found" errors, ensure you have Chrome installed and WebDriverManager is properly set up
+- If websites block the crawler, try adjusting the delay between requests or using different user agent patterns
+- For memory issues with large websites, consider limiting the maximum number of pages to crawl
 
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
