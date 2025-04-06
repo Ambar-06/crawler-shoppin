@@ -128,6 +128,3 @@ class NewSiteCrawler(BaseCrawler):
 - If websites block the crawler, try adjusting the delay between requests or using different user agent patterns
 - For memory issues with large websites, consider limiting the maximum number of pages to crawl
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
