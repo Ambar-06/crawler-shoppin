@@ -6,7 +6,6 @@ from base_crawler import BaseCrawler
 from constants import Constant
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from fake_useragent import UserAgent
 
 site_name = "westside"
 file = "crawler"
@@ -20,10 +19,6 @@ class WestsideCrawler(BaseCrawler):
     """
     Specialized crawler for Westside website.
     """
-    
-    def __init__(self):
-        """Initialize the crawler."""
-        self.user_agent = UserAgent()
     
     def _is_product_url(self, url: str) -> bool:
         """Check if a URL is likely to be a product URL."""

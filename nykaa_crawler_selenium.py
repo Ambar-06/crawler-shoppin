@@ -20,10 +20,6 @@ class NykaaFashionCrawler(BaseCrawler):
     Specialized crawler for Nykaa Fashion website.
     """
     
-    def __init__(self):
-        """Initialize the crawler."""
-        self.user_agent = UserAgent()
-    
     def _is_product_url(self, url: str) -> bool:
         """Check if a URL is likely to be a product URL."""
         for pattern in Constant().NYKAA_PRODUCT_PATTERNS:

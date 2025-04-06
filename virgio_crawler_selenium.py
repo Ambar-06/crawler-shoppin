@@ -8,8 +8,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-from fake_useragent import UserAgent
-
 site_name = "virgio"
 file = "crawler"
 base_url, core_url = Constant().URL_MAPPING.get(site_name)
@@ -21,10 +19,6 @@ class VirgioCrawler(BaseCrawler):
     """
     Specialized crawler for Virgio website.
     """
-    
-    def __init__(self):
-        """Initialize the crawler."""
-        self.user_agent = UserAgent()
     
     def _is_product_url(self, url: str) -> bool:
         """Check if a URL is likely to be a product URL."""

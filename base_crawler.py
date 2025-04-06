@@ -1,3 +1,4 @@
+from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 import time
@@ -15,6 +16,10 @@ logger = logging.getLogger("base_crawler")
 
 
 class BaseCrawler:
+
+    def __init__(self):
+        """Initialize the crawler."""
+        self.user_agent = UserAgent()
 
     def _scroll_page(self, driver: webdriver.Chrome) -> None:
         """Scroll down the page to load lazy-loaded content."""

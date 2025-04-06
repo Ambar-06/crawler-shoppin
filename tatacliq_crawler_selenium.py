@@ -1,6 +1,8 @@
 import json
 import time
 import random
+
+from fake_useragent import UserAgent
 from base_crawler import BaseCrawler
 from constants import Constant
 from logger import get_configured_logger
@@ -8,7 +10,6 @@ from typing import Set, List
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from fake_useragent import UserAgent
 
 site_name = "tatacliq"
 file = "crawler"
@@ -170,7 +171,7 @@ class TataCliqCrawler(BaseCrawler):
                 try:
                     logger.info(f"Visiting category {i+1}/{len(categories_to_visit)}: {category_url}")
                     driver.get(category_url)
-                    time.sleep(5)  # Wait for page to load
+                    time.sleep(5)
                     
                     self._handle_cookie_consent(driver)
                     self._handle_popups(driver)
@@ -182,7 +183,7 @@ class TataCliqCrawler(BaseCrawler):
                     product_urls.update(category_links)
                     logger.info(f"Found {len(category_links)} product URLs from category {category_url}")
                     
-                    time.sleep(random.uniform(2, 4))
+                    time.sleep(random.uniform(2, 4)) # nosec
                     
                 except Exception as e:
                     logger.error(f"Error processing category {category_url}: {e}")
@@ -214,7 +215,7 @@ class TataCliqCrawler(BaseCrawler):
                     product_urls.update(search_links)
                     logger.info(f"Found {len(search_links)} product URLs from search term '{term}'")
                     
-                    time.sleep(random.uniform(2, 4))
+                    time.sleep(random.uniform(2, 4)) # nosec
                     
                 except Exception as e:
                     logger.error(f"Error processing search for {term}: {e}")
