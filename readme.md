@@ -35,7 +35,7 @@ The primary task of this crawler is to discover and list all product URLs across
 1. Clone the repository:
 ```bash
 git clone https://github.com/Ambar-06/crawler-shoppin.git
-cd ecommerce-product-url-crawler
+cd crawler-shoppin
 ```
 
 2. Create a virtual environment (optional but recommended):
